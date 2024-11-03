@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pool Game Players</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { text-align: center; }
+        .table-group { margin: 20px; }
+        .table-group h2 { margin-bottom: 10px; }
+        .players { margin-left: 20px; }
+        form { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Pool Game Player Management</h1>
+    <div class="table-group">
+        {% for table, players in pool_tables.items() %}
+            <h2>{{ table }}</h2>
+            <div class="players">
+                <ul>
+                    {% for player in players %}
+                        <li>{{ player }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <form action="{{ url_for('remove_player') }}" method="POST">
+                <input type="hidden" name="table" value="{{ table }}">
+                <input type="text" name="player_name" placeholder="Remove player name">
+                <button type="submit">Remove Player</button>
+            </form>
+        {% endfor %}
+    </div>
+    <form action="{{ url_for('add_player') }}" method="POST">
+        <select name="table">
+            {% for table in pool_tables.keys() %}
+                <option value="{{ table }}">{{ table }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="player_name" placeholder="Enter player name" required>
+        <button type="submit">Add Player</button>
+    </form>
+</body>
+</html>
