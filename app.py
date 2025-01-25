@@ -2,9 +2,14 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 import os
+import logging
+from marshmallow import Schema, fields, ValidationError
 
 # Initialize Flask application
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 # Configure database
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///poolgame.db')
@@ -24,14 +29,28 @@ class Player(db.Model):
 def create_tables():
     try:
         db.create_all()
-        print("Tables created successfully.")
+        logging.info("Tables created successfully.")
     except Exception as e:
-        print(f"Error creating tables: {e}")
+        logging.error(f"Error creating tables: {e}")
+
+# Schema for input validation
+class PlayerSchema(Schema):
+    name = fields.String(required=True)
+    table = fields.String(required=True)
+
+player_schema = PlayerSchema()
 
 # Route to add a new player
 @app.route('/players', methods=['POST'])
 def add_player():
     data = request.get_json()
+    
+    # Validate input
+    try:
+        player_schema.load(data)
+    except ValidationError as e:
+        return jsonify({'message': 'Invalid input', 'errors': e.messages}), 400
+    
     new_player = Player(name=data['name'], table=data['table'])
     
     try:
@@ -43,7 +62,8 @@ def add_player():
         return jsonify({'message': 'Player already exists!'}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'message': str(e)}), 500
+        logging.error(f"Error adding player: {e}")
+        return jsonify({'message': 'An error occurred. Please try again later.'}), 500
 
 # Route to get all players
 @app.route('/players', methods=['GET'])
