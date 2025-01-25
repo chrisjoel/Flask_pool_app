@@ -3,7 +3,7 @@ FROM python:3.11-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV DATABASE_URL=sqlite:///poolgame.db  # Update with secure credentials for production
+ENV DATABASE_URL=sqlite:///poolgame.db 
 
 # Create a working directory
 WORKDIR /app
