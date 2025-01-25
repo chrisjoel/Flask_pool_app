@@ -1,24 +1,24 @@
-# Use the official Python image from the Docker Hub
-FROM python:3.9-slim
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the requirements file
-COPY requirements.txt .
-
-# Install the dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code
-COPY . .
-
-# Expose the port the app runs on
-EXPOSE 5000
+# Use a lightweight base image
+FROM python:3.11-slim
 
 # Set environment variables
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=production
+ENV PYTHONUNBUFFERED=1
+ENV DATABASE_URL=sqlite:///poolgame.db  # Update with secure credentials for production
+
+# Create a working directory
+WORKDIR /app
+
+# Copy requirements file first
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code
+COPY . .
+
+# Expose the application port
+EXPOSE 5000
 
 # Command to run the application
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["python", "app.py"]
